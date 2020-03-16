@@ -6,7 +6,7 @@ build:
 	@go build -o bin/protoc-gen-jsonschema cmd/protoc-gen-jsonschema/main.go
 
 
-custom: build
+custom-debug: build
 	protoc --plugin=protoc-gen-custom=./bin/protoc-gen-jsonschema --proto_path=protos --custom_out=./out/  `find protos/ -type f -name '*.proto'`
 
 install:

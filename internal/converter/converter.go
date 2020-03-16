@@ -197,9 +197,6 @@ func (c *Converter) convert(req *plugin.CodeGeneratorRequest) (*plugin.CodeGener
 			c.logger.WithField("filename", file.GetName()).Debug("Converting file")
 			converted, err := c.convertFile(file)
 
-			//c.logger.Info("!!!!!!!!!!!!!!!!!!!")
-			//c.logger.Info(converted)
-			//c.logger.Info("!!!!!!!!!!!!!!!!!!!")
 			if err != nil {
 				res.Error = proto.String(fmt.Sprintf("Failed to convert %s: %v", file.GetName(), err))
 				return res, err

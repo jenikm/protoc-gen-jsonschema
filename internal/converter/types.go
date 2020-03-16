@@ -293,6 +293,17 @@ func (c *Converter) convertMessageType(curPkg *ProtoPackage, msg *descriptor.Des
 	// Generate a description from src comments (if available)
 	if src := c.sourceInfo.GetMessage(msg); src != nil {
 		jsonSchemaType.Description = formatDescription(src)
+		var rgx = regexp.MustCompile("(?s)JSON_SCHEMA(.+)JSON_SCHEMA")
+		matches := rgx.FindStringSubmatch(jsonSchemaType.Description)
+
+		if len(matches) > 0 {
+			criteria := buildValidations()
+			json.Unmarshal([]byte(matches[1]), &criteria)
+
+			if len(criteria.Required) > 0 {
+				jsonSchemaType.Required = criteria.Required
+			}
+		}
 	}
 
 	// Optionally allow NULL values:
