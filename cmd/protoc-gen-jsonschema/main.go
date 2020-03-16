@@ -21,7 +21,7 @@ func main() {
 
 	// Make a Logrus logger (default to INFO):
 	logger := logrus.New()
-	logger.SetLevel(logrus.InfoLevel)
+	logger.SetLevel(logrus.TraceLevel)
 	logger.SetOutput(os.Stderr)
 
 	// Use the logger to make a Converter:

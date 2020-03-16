@@ -5,6 +5,10 @@ build:
 	@mkdir -p bin
 	@go build -o bin/protoc-gen-jsonschema cmd/protoc-gen-jsonschema/main.go
 
+
+custom: build
+	protoc --plugin=protoc-gen-custom=./bin/protoc-gen-jsonschema --proto_path=protos --custom_out=./out/  `find protos/ -type f -name '*.proto'`
+
 install:
 	@GO111MODULE=on go get -u github.com/chrusty/protoc-gen-jsonschema/cmd/protoc-gen-jsonschema && go install github.com/chrusty/protoc-gen-jsonschema/cmd/protoc-gen-jsonschema
 

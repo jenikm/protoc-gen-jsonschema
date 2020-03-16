@@ -1,5 +1,7 @@
 module github.com/chrusty/protoc-gen-jsonschema
 
+go 1.14
+
 require (
 	github.com/alecthomas/jsonschema v0.0.0-20190626084004-00dfc6288dec
 	github.com/golang/protobuf v1.3.2

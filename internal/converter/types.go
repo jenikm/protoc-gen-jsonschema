@@ -3,6 +3,7 @@ package converter
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/alecthomas/jsonschema"
@@ -19,6 +20,12 @@ var (
 		types:    make(map[string]*descriptor.DescriptorProto),
 	}
 )
+
+type JsonSchemaTypes struct {
+	MinLength int
+	MaxLength int
+	Required  []string
+}
 
 func (c *Converter) registerType(pkgName *string, msg *descriptor.DescriptorProto) {
 	pkg := globalPkg
@@ -60,6 +67,11 @@ componentLoop:
 	return desc, true
 }
 
+func buildValidations() JsonSchemaTypes {
+	return JsonSchemaTypes{MinLength: -1, MaxLength: -1}
+
+}
+
 // Convert a proto "field" (essentially a type-switch with some recursion):
 func (c *Converter) convertField(curPkg *ProtoPackage, desc *descriptor.FieldDescriptorProto, msg *descriptor.DescriptorProto) (*jsonschema.Type, error) {
 
@@ -71,6 +83,19 @@ func (c *Converter) convertField(curPkg *ProtoPackage, desc *descriptor.FieldDes
 	// Generate a description from src comments (if available)
 	if src := c.sourceInfo.GetField(desc); src != nil {
 		jsonSchemaType.Description = formatDescription(src)
+		var rgx = regexp.MustCompile("(?s)JSON_SCHEMA(.+)JSON_SCHEMA")
+		matches := rgx.FindStringSubmatch(jsonSchemaType.Description)
+		if len(matches) > 0 {
+			criteria := buildValidations()
+			json.Unmarshal([]byte(matches[1]), &criteria)
+			if len(criteria.Required) > 0 {
+				jsonSchemaType.Required = criteria.Required
+			}
+			jsonSchemaType.MinLength = criteria.MinLength
+			if criteria.MaxLength != -1 {
+				jsonSchemaType.MaxLength = criteria.MaxLength
+			}
+		}
 	}
 
 	// Switch the types, and pick a JSONSchema equivalent:
@@ -263,7 +288,7 @@ func (c *Converter) convertMessageType(curPkg *ProtoPackage, msg *descriptor.Des
 	// Prepare a new jsonschema:
 	jsonSchemaType := jsonschema.Type{
 		Properties: make(map[string]*jsonschema.Type),
-		Version:    jsonschema.Version,
+		Version:    "http://json-schema.org/draft-07/schema",
 	}
 	// Generate a description from src comments (if available)
 	if src := c.sourceInfo.GetMessage(msg); src != nil {

@@ -52,7 +52,6 @@ func (c *Converter) ConvertFrom(rd io.Reader) (*plugin.CodeGeneratorResponse, er
 
 	c.logger.Debug("Converting input")
 	return c.convert(req)
-	// return c.debugger(req)
 }
 
 func (c *Converter) parseGeneratorParameters(parameters string) {
@@ -77,7 +76,7 @@ func (c *Converter) convertEnumType(enum *descriptor.EnumDescriptorProto) (jsons
 
 	// Prepare a new jsonschema.Type for our eventual return value:
 	jsonSchemaType := jsonschema.Type{
-		Version: jsonschema.Version,
+		Version: "http://json-schema.org/draft-07/schema",
 	}
 
 	// Generate a description from src comments (if available)
@@ -192,10 +191,15 @@ func (c *Converter) convert(req *plugin.CodeGeneratorRequest) (*plugin.CodeGener
 			c.registerType(file.Package, msg)
 		}
 	}
+
 	for _, file := range req.GetProtoFile() {
 		if _, ok := generateTargets[file.GetName()]; ok {
 			c.logger.WithField("filename", file.GetName()).Debug("Converting file")
 			converted, err := c.convertFile(file)
+
+			//c.logger.Info("!!!!!!!!!!!!!!!!!!!")
+			//c.logger.Info(converted)
+			//c.logger.Info("!!!!!!!!!!!!!!!!!!!")
 			if err != nil {
 				res.Error = proto.String(fmt.Sprintf("Failed to convert %s: %v", file.GetName(), err))
 				return res, err
